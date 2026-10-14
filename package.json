@@ -1,0 +1,12 @@
+{
+  "name": "soe-kalayar-booking",
+  "version": "1.0.0",
+  "description": "Soe Kalayar coaching and counseling booking app",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^5.1.0"
+  }
+}
