@@ -1,4 +1,5 @@
 const express = require("express");
+const { installBookingRoutes } = require("./booking-system");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -110,41 +111,7 @@ app.get("/", (req, res) => {
   return respondHtml(res, 200, page(lang, body));
 });
 
-app.post("/booking", async (req, res) => {
-  const lang = preferredLanguage(req);
-  const t = labels[lang];
-  const { name, email, phone, service, date, message = "" } = req.body || {};
-  const valid = [name, email, phone, service, date, message].every(x => typeof x === "string")
-    && name?.trim().length > 0 && name.length <= 100
-    && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 200
-    && phone?.trim().length > 0 && phone.length <= 40
-    && allowedServices.includes(service)
-    && /^\d{4}-\d{2}-\d{2}$/.test(date)
-    && !Number.isNaN(Date.parse(date))
-    && message.length <= 1000;
-  if (!valid) return respondHtml(res, 400, page(lang, `<h1>${t.invalid}</h1><a href="/?lang=${lang}">${t.home}</a>`));
-
-  // Deliberately do not log personal information or claim a booking was saved.
-  // Configure a private HTTPS endpoint in BOOKING_WEBHOOK_URL for persistent handling.
-  const webhookUrl = process.env.BOOKING_WEBHOOK_URL;
-  if (!webhookUrl || !/^https:\/\//.test(webhookUrl)) {
-    console.error("Booking unavailable: BOOKING_WEBHOOK_URL is not configured.");
-    return respondHtml(res, 503, page(lang, `<h1>${t.error}</h1><a href="/?lang=${lang}">${t.home}</a>`));
-  }
-  try {
-    const result = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ name: name.trim(), email: email.trim(), phone: phone.trim(), service, date, message, language: lang }),
-      signal: AbortSignal.timeout(10000)
-    });
-    if (!result.ok) throw new Error("Booking delivery failed");
-  } catch (err) {
-    console.error("Booking delivery failed without logging customer data.");
-    return respondHtml(res, 503, page(lang, `<h1>${t.error}</h1><a href="/?lang=${lang}">${t.home}</a>`));
-  }
-  return respondHtml(res, 200, page(lang, `<h1>${t.received}</h1><p>${t.thanks}</p><a href="/?lang=${lang}">${t.home}</a>`));
-});
+installBookingRoutes(app, { page, labels, preferredLanguage, respondHtml, escapeHtml, allowedServices });
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.listen(PORT, "0.0.0.0", () => console.log(`Server is running on port ${PORT}`));
