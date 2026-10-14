@@ -3,104 +3,148 @@ const express = require("express");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.use(express.urlencoded({ extended: false }));
-app.use(express.json());
+app.disable("x-powered-by");
+app.use(express.urlencoded({ extended: false, limit: "10kb" }));
+app.use(express.json({ limit: "10kb" }));
 
-app.get("/", (req, res) => {
-  res.send(`<!doctype html>
-<html lang="my">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Soe Kalayar | Booking</title>
-  <style>
-    body { font-family: Arial, sans-serif; max-width: 680px; margin: 40px auto; padding: 0 16px; color: #222; }
-    label { display: block; margin-top: 16px; }
-    input, select, textarea, button { box-sizing: border-box; width: 100%; padding: 11px; margin-top: 6px; }
-    button { margin-top: 20px; cursor: pointer; background: #245c4b; color: white; border: 0; }
-  </style>
-</head>
-<body>
-  <h1>Soe Kalayar</h1>
-  <p>Coaching for Small Business &amp; Counseling for Personal Development</p>
-
-  <form method="post" action="/booking">
-    <label>အမည်
-      <input name="name" required maxlength="100">
-    </label>
-    <label>Email
-      <input type="email" name="email" required maxlength="200">
-    </label>
-    <label>Утасны дугаар
-      <input name="phone" required maxlength="40">
-    </label>
-    <label>Үйлчилгээ
-      <select name="service" required>
-        <option value="">Сонгоно уу</option>
-        <option value="Small Business Coaching">Small Business Coaching</option>
-        <option value="Personal Development Counseling">Personal Development Counseling</option>
-      </select>
-    </label>
-    <label>Хүссэн өдөр
-      <input type="date" name="date" required>
-    </label>
-    <label>Тайлбар (заавал биш)
-      <textarea name="message" rows="4" maxlength="1000"></textarea>
-    </label>
-    <button type="submit">Райм захиалах хүсэлт илгээх</button>
-  </form>
-</body>
-</html>`);
-});
-
-app.post("/booking", (req, res) => {
-  const { name, email, phone, service, date, message = "" } = req.body;
-
-  if (!name || !email || !phone || !service || !date) {
-    return res.status(400).send("Бүх шаардлагатай талбарыг бөглөнө үү.");
+const labels = {
+  my: {
+    title: "ဝန်ဆောင်မှု ကြိုတင်ချိန်းဆိုရန်",
+    name: "အမည်", email: "အီးမေးလ်", phone: "ဖုန်းနံပါတ်",
+    service: "ဝန်ဆောင်မှု", choose: "ရွေးချယ်ပါ",
+    business: "အသေးစားစီးပွားရေး လုပ်ငန်းရှင်များအတွက် Coaching",
+    counseling: "တစ်ကိုယ်ရည် ဖွံ့ဖြိုးတိုးတက်ရေးအတွက် Counseling",
+    date: "ချိန်းဆိုလိုသည့်ရက်စွဲ",
+    notes: "အပိုဆောင်းမှတ်ချက် (မဖြည့်လည်းရပါသည်)",
+    submit: "ချိန်းဆိုရန် တောင်းဆိုချက် ပေးပို့မည်",
+    privacy: "သင့်အချက်အလက်များကို ချိန်းဆိုမှုစီစဉ်ရန်သာ အသုံးပြုပါမည်။",
+    received: "တောင်းဆိုချက် လက်ခံရရှိပါပြီ",
+    thanks: "ချိန်းဆိုမှုတောင်းဆိုချက်ကို လက်ခံရရှိပါပြီ။ အတည်ပြုရန် ပြန်လည်ဆက်သွယ်ပေးပါမည်။",
+    home: "မူလစာမျက်နှာသို့ ပြန်သွားရန်",
+    invalid: "ဖြည့်သွင်းထားသည့် အချက်အလက်များကို ပြန်လည်စစ်ဆေးပါ။",
+    error: "ဝန်ဆောင်မှုကို ယခုမရရှိနိုင်ပါ။ နောက်မှ ထပ်မံကြိုးစားပါ။"
+  },
+  en: {
+    title: "Book an Appointment",
+    name: "Full Name", email: "Email Address", phone: "Phone Number",
+    service: "Service", choose: "Select a service",
+    business: "Small Business Coaching",
+    counseling: "Personal Development Counseling",
+    date: "Preferred Appointment Date",
+    notes: "Additional Notes (Optional)",
+    submit: "Submit Booking Request",
+    privacy: "Your information will only be used to arrange your appointment.",
+    received: "Request Received",
+    thanks: "Your appointment request has been received. We will contact you to confirm the date.",
+    home: "Back to Home",
+    invalid: "Please check the information and try again.",
+    error: "Booking is temporarily unavailable. Please try again later."
   }
+};
 
-  const allowedServices = [
-    "Small Business Coaching",
-    "Personal Development Counseling"
-  ];
-
-  if (!allowedServices.includes(service)) {
-    return res.status(400).send("Үйлчилгээний сонголт буруу байна.");
-  }
-
-  // Түр хувилбар: Render logs дээр захиалгын хүсэлтийг харуулна.
-  // Бодит хэрэглээнд мэдээллийг database-д хадгалж, лог дээр хувийн мэдээлэл бүү хэвлээрэй.
-  console.log("Шинэ захиалгын хүсэлт:", {
-    name,
-    email,
-    phone,
-    service,
-    date,
-    message
-  });
-
-  res.send(`
-    <h1>Хүсэлт хүлээн авлаа</h1>
-    <p>Баярлалаа, ${escapeHtml(name)}. Soe Kalayar тантай холбогдоно.</p>
-    <a href="/">Нүүр хуудас руу буцах</a>
-  `);
-});
-
-app.get("/health", (req, res) => {
-  res.json({ status: "ok" });
-});
-
+const allowedServices = ["Small Business Coaching", "Personal Development Counseling"];
 function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({
-    "&": "&amp;",
-    "<": "&lt;",
-    ">": "&gt;",
-    '"': "&quot;",
-    "'": "&#39;"
+  return String(value).replace(/[&<>"']/g, char => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
   })[char]);
 }
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log(`Server is running on port ${PORT}`);
+function preferredLanguage(req) {
+  return req.query.lang === "en" || req.body?.lang === "en" ? "en" : "my";
+}
+function page(lang, body) {
+  return `<!doctype html><html lang="${lang}"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="no-referrer">
+<title>Soe Kalayar | Booking</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#f4f8f5;color:#18352b;font-family:Arial,"Noto Sans Myanmar",sans-serif;line-height:1.65}
+main{max-width:660px;margin:40px auto;padding:32px;background:white;border-radius:18px;box-shadow:0 8px 35px #122d1d15}
+header{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+h1{margin:0;font-size:30px}h2{font-size:22px}p{color:#4e665c}
+.language a{padding:7px 12px;border:1px solid #cbded3;border-radius:9px;text-decoration:none;color:#245c4b}
+.language a[aria-current=page]{background:#245c4b;color:white}
+label{display:block;margin-top:17px;font-weight:600}
+input,select,textarea{width:100%;padding:12px;margin-top:6px;border:1px solid #b5cbbd;border-radius:9px;font:inherit;color:#18352b;background:#fff}
+button{width:100%;margin-top:22px;padding:14px;border:0;border-radius:9px;background:#245c4b;color:#fff;font:inherit;cursor:pointer}
+small{display:block;margin-top:12px;color:#526c5f}
+a{color:#245c4b}
+@media(max-width:700px){main{margin:12px;padding:22px}}
+</style></head><body><main>${body}</main></body></html>`;
+}
+function respondHtml(res, status, html) {
+  res.set("Cache-Control", "no-store");
+  res.set("Content-Security-Policy", "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'; frame-ancestors 'none'");
+  return res.status(status).type("html").send(html);
+}
+app.get("/", (req, res) => {
+  const lang = preferredLanguage(req);
+  const t = labels[lang];
+  const body = `<header><h1>Soe Kalayar</h1>
+<nav class="language" aria-label="Language">
+<a href="/?lang=my" ${lang === "my" ? 'aria-current="page"' : ""}>မြန်မာ</a>
+<a href="/?lang=en" ${lang === "en" ? 'aria-current="page"' : ""}>English</a>
+</nav></header>
+<p>Coaching for Small Business &amp; Counseling for Personal Development</p>
+<h2>${t.title}</h2>
+<form method="post" action="/booking" accept-charset="UTF-8">
+<input type="hidden" name="lang" value="${lang}">
+<label for="name">${t.name} *</label>
+<input id="name" name="name" autocomplete="name" required maxlength="100">
+<label for="email">${t.email} *</label>
+<input id="email" type="email" name="email" autocomplete="email" required maxlength="200">
+<label for="phone">${t.phone} *</label>
+<input id="phone" type="tel" name="phone" autocomplete="tel" required maxlength="40">
+<label for="service">${t.service} *</label>
+<select id="service" name="service" required>
+<option value="">${t.choose}</option>
+<option value="Small Business Coaching">${t.business}</option>
+<option value="Personal Development Counseling">${t.counseling}</option>
+</select>
+<label for="date">${t.date} *</label>
+<input id="date" type="date" name="date" required min="${new Date().toISOString().slice(0, 10)}">
+<label for="message">${t.notes}</label>
+<textarea id="message" name="message" rows="4" maxlength="1000"></textarea>
+<small>${t.privacy}</small>
+<button type="submit">${t.submit}</button>
+</form>`;
+  return respondHtml(res, 200, page(lang, body));
 });
+
+app.post("/booking", async (req, res) => {
+  const lang = preferredLanguage(req);
+  const t = labels[lang];
+  const { name, email, phone, service, date, message = "" } = req.body || {};
+  const valid = [name, email, phone, service, date, message].every(x => typeof x === "string")
+    && name?.trim().length > 0 && name.length <= 100
+    && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) && email.length <= 200
+    && phone?.trim().length > 0 && phone.length <= 40
+    && allowedServices.includes(service)
+    && /^\d{4}-\d{2}-\d{2}$/.test(date)
+    && !Number.isNaN(Date.parse(date))
+    && message.length <= 1000;
+  if (!valid) return respondHtml(res, 400, page(lang, `<h1>${t.invalid}</h1><a href="/?lang=${lang}">${t.home}</a>`));
+
+  // Deliberately do not log personal information or claim a booking was saved.
+  // Configure a private HTTPS endpoint in BOOKING_WEBHOOK_URL for persistent handling.
+  const webhookUrl = process.env.BOOKING_WEBHOOK_URL;
+  if (!webhookUrl || !/^https:\/\//.test(webhookUrl)) {
+    console.error("Booking unavailable: BOOKING_WEBHOOK_URL is not configured.");
+    return respondHtml(res, 503, page(lang, `<h1>${t.error}</h1><a href="/?lang=${lang}">${t.home}</a>`));
+  }
+  try {
+    const result = await fetch(webhookUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name: name.trim(), email: email.trim(), phone: phone.trim(), service, date, message, language: lang }),
+      signal: AbortSignal.timeout(10000)
+    });
+    if (!result.ok) throw new Error("Booking delivery failed");
+  } catch (err) {
+    console.error("Booking delivery failed without logging customer data.");
+    return respondHtml(res, 503, page(lang, `<h1>${t.error}</h1><a href="/?lang=${lang}">${t.home}</a>`));
+  }
+  return respondHtml(res, 200, page(lang, `<h1>${t.received}</h1><p>${t.thanks}</p><a href="/?lang=${lang}">${t.home}</a>`));
+});
+
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+app.listen(PORT, "0.0.0.0", () => console.log(`Server is running on port ${PORT}`));
