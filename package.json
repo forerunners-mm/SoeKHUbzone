@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "start:bot": "node todo-bot.js"
+    "start:bot": "node todo-bot.js",
+    "start:webhook": "node todo-webhook.js"
   },
   "dependencies": {
     "express": "^5.1.0",
