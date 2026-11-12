@@ -103,8 +103,15 @@ function localNowString() {
 function parseDue(value) {
   // Input is Myanmar local time: YYYY-MM-DD HH:mm
   if (!/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/.test(value)) return null;
-  const d = new Date(value.replace(" ", "T") + ":00+06:30");
-  return Number.isNaN(d.getTime()) ? null : d;
+  const [datePart, timePart] = value.split(" ");
+  const [year, month, day] = datePart.split("-").map(Number);
+  const [hour, minute] = timePart.split(":").map(Number);
+  const d = new Date(Date.UTC(year, month - 1, day, hour - 6, minute - 30));
+  const check = new Date(d.getTime() + 390 * 60 * 1000);
+  if (check.getUTCFullYear() !== year || check.getUTCMonth() + 1 !== month ||
+      check.getUTCDate() !== day || check.getUTCHours() !== hour ||
+      check.getUTCMinutes() !== minute) return null;
+  return d;
 }
 function helpText() {
   return [
