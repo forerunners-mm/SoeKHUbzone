@@ -1,45 +1,57 @@
-# Soe Kalayar To-do Telegram Worker
+# Soe Kalayar To-do Assistant — Free Hybrid Deployment
 
-This worker is intentionally separate from the existing booking website and the existing Service & Product bot.
+This is separate from the existing booking website and Service & Product bot.
 
-## Run locally / as a separate hosting service
+## Architecture
 
-- Node.js 20+
-- Install: `npm install`
-- Start only the To-do worker: `npm run start:bot`
+- Render Free Web Service receives Telegram updates through a webhook. It may sleep after inactivity, so first response after idle may be delayed.
+- GitHub Actions sends task briefings at 07:00, 13:00, and 20:00 Myanmar Time (UTC times: 00:30, 06:30, 13:30).
+- Telegram task data is stored in the SoeK Hub Google Sheet, in a dedicated `Tasks` tab.
+- Do not run the old polling worker and webhook worker at the same time with the same bot token.
 
-Do **not** change the existing website start command (`npm start`). Deploy this worker as a separate service/process so the booking website remains online independently.
+## Render Web Service
 
-## Required environment variables
+- Repository: `forerunners-mm/SoeKHUbzone`
+- Branch: `feature/telegram-todo-assistant` (after review/merge, use the branch containing these files)
+- Runtime: Node
+- Build command: `npm install`
+- Start command: `npm run start:webhook`
+- Health check path: `/health`
 
-- `TELEGRAM_BOT_TOKEN`: token for the dedicated `@Soekalayar.bot` To-do bot only. Never add a token to GitHub.
-- `TELEGRAM_ALLOWED_CHAT_ID`: your personal Telegram numeric chat ID. The bot rejects all other chats.
-- `SOEKHUB_GOOGLE_SHEET_ID`: ID of the SoeK Hub Google Sheet.
-- `GOOGLE_SERVICE_ACCOUNT_JSON`: complete service-account JSON stored as a hosting secret. Share the target Google Sheet with the service account email as Editor.
-- `TODO_SHEET_NAME`: optional; defaults to `Tasks`.
+Render environment variables:
+- `TELEGRAM_BOT_TOKEN`: dedicated To-do bot token only
+- `TELEGRAM_WEBHOOK_SECRET`: 1-256 chars, only A-Z/a-z/0-9/_/-
+- `WEBHOOK_PATH_SECRET`: random path secret, at least 24 characters
+- `TELEGRAM_ALLOWED_CHAT_ID`: personal numeric chat ID (can be added after /id is used)
+- `SOEKHUB_GOOGLE_SHEET_ID`: SoeK Hub Sheet ID
+- `GOOGLE_SERVICE_ACCOUNT_JSON`: complete service account JSON stored as a secret
+- `TODO_SHEET_NAME`: optional; defaults to `Tasks`
 
-The worker creates a `Tasks` tab and its header row if they do not exist. It stores only task title, due time, status, creation time and source. Do not put counseling notes or sensitive personal details in task titles.
+Render supplies `PORT` and `RENDER_EXTERNAL_URL`.
+
+## GitHub Actions repository secrets
+
+Add the following under Settings > Secrets and variables > Actions > New repository secret:
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_ALLOWED_CHAT_ID`
+- `SOEKHUB_GOOGLE_SHEET_ID`
+- `GOOGLE_SERVICE_ACCOUNT_JSON`
+- Optional `TODO_SHEET_NAME` (value: `Tasks`)
+
+The service account email in the JSON must have Editor access to the target Google Sheet. Do not commit credentials to GitHub or paste them into chat.
 
 ## Telegram commands
 
-- `/id`: show your numeric Telegram chat ID in a private chat (use it for `TELEGRAM_ALLOWED_CHAT_ID`)
-- `/start` or `/help`: show instructions
-- `/add YYYY-MM-DD HH:mm | Task description`: add a task
-- `/list`: list incomplete tasks
-- `/done TASKID`: mark a task completed
+- `/id` — returns your private chat ID before the allowed ID is configured
+- `/start` or `/help` — instructions (after allowed chat ID is configured)
+- `/add YYYY-MM-DD HH:mm | Task description`
+- `/list`
+- `/done TASKID`
 
-All dates and reminders use Myanmar Time (`Asia/Yangon`, UTC+06:30).
+All task times use Myanmar Time (Asia/Yangon).
 
-## Daily reminders
+## Limitations
 
-- 07:00 — morning task briefing
-- 13:00 — midday task check
-- 20:00 — evening review
+Render Free Web Services can sleep after inactivity. Telegram webhook messages may be delayed while the service wakes. GitHub Actions scheduled workflows are not guaranteed to start at the exact minute; GitHub may delay scheduled events. This is a free pilot, not a guaranteed critical-alert system.
 
-## Important deployment safety
-
-- Keep this worker in a separate hosting service from the booking website.
-- Run only one polling instance for this bot token. Do not start a second copy elsewhere.
-- Do not reuse the Service & Product bot token.
-- Do not change the existing website's `npm start` command.
-- The worker has not been deployed or connected to Google Sheets automatically by this repository change.
+Do not store counseling notes, passwords, or sensitive personal details in task titles. Keep the existing website `npm start` unchanged.
