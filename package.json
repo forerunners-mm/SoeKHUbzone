@@ -4,11 +4,15 @@
   "description": "Soe Kalayar coaching and counseling booking app",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "start:bot": "node todo-bot.js"
   },
   "dependencies": {
     "express": "^5.1.0",
     "pg": "^8.16.3",
-    "nodemailer": "^7.0.9"
+    "nodemailer": "^7.0.9",
+    "googleapis": "^144.0.0",
+    "node-cron": "^3.0.3",
+    "node-telegram-bot-api": "^0.66.0"
   }
 }
