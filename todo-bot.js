@@ -127,6 +127,10 @@ function helpText() {
   ].join("\n");
 }
 
+bot.onText(/^\/id(?:@\w+)?$/, async msg => {
+  if (msg.chat.type !== "private") return;
+  await bot.sendMessage(msg.chat.id, `သင့် Telegram Chat ID: ${msg.chat.id}`);
+});
 bot.onText(/^\/start(?:@\w+)?$/, async msg => {
   if (!isAllowed(msg)) return bot.sendMessage(msg.chat.id, "ဒီ Bot ကို အသုံးပြုခွင့်မရှိပါ။");
   await bot.sendMessage(msg.chat.id, helpText());
