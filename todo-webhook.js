@@ -181,17 +181,26 @@ app.get("/health", (req, res) => res.json({ status: "ok", service: "soe-kalayar-
 app.listen(PORT, "0.0.0.0", async () => {
   try {
     await bot.setWebHook(webhookUrl, { secret_token: WEBHOOK_SECRET });
-    if (SPREADSHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
-      await ensureTab();
-      console.log("Google Sheets Tasks tab is ready.");
-    } else {
-      console.log("Google Sheets is not configured yet; /id remains available.");
-    }
-    console.log("To-do webhook is active at " + BASE_URL + "/health");
+    console.log("Telegram webhook registered successfully.");
   } catch (e) {
     console.error("Telegram webhook registration failed:", e.message);
     process.exit(1);
+    return;
   }
+
+  if (SPREADSHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+    try {
+      await ensureTab();
+      console.log("Google Sheets Tasks tab is ready.");
+    } catch (e) {
+      console.error("Google Sheets setup failed:", e.message);
+      console.error("Check Sheets API enablement, spreadsheet ID, and service-account Editor access.");
+    }
+  } else {
+    console.log("Google Sheets is not configured yet; /id remains available.");
+  }
+
+  console.log("To-do webhook is active at " + BASE_URL + "/health");
 });
 process.on("SIGTERM", async () => {
   try { await bot.deleteWebHook(); } catch (_) {}
