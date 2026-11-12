@@ -22,6 +22,7 @@ The worker creates a `Tasks` tab and its header row if they do not exist. It sto
 
 ## Telegram commands
 
+- `/id`: show your numeric Telegram chat ID in a private chat (use it for `TELEGRAM_ALLOWED_CHAT_ID`)
 - `/start` or `/help`: show instructions
 - `/add YYYY-MM-DD HH:mm | Task description`: add a task
 - `/list`: list incomplete tasks
