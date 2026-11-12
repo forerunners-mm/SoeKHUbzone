@@ -180,7 +180,13 @@ app.post("/telegram/" + WEBHOOK_PATH_SECRET, (req, res) => {
 app.get("/health", (req, res) => res.json({ status: "ok", service: "soe-kalayar-todo-webhook" }));
 app.listen(PORT, "0.0.0.0", async () => {
   try {
-    await bot.setWebHook(webhookUrl, { secret_token: WEBHOOK_SECRET, drop_pending_updates: true });
+    await bot.setWebHook(webhookUrl, { secret_token: WEBHOOK_SECRET });
+    if (SPREADSHEET_ID && process.env.GOOGLE_SERVICE_ACCOUNT_JSON) {
+      await ensureTab();
+      console.log("Google Sheets Tasks tab is ready.");
+    } else {
+      console.log("Google Sheets is not configured yet; /id remains available.");
+    }
     console.log("To-do webhook is active at " + BASE_URL + "/health");
   } catch (e) {
     console.error("Telegram webhook registration failed:", e.message);
