@@ -1,5 +1,6 @@
 const express = require("express");
 const { installBookingRoutes } = require("./booking-system");
+const { installAiAssistantRoutes } = require("./ai-assistant");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -164,6 +165,7 @@ function respondHtml(res, status, html) {
   return res.status(status).type("html").send(html);
 }
 installBookingRoutes(app, { page, labels, preferredLanguage, respondHtml, escapeHtml, allowedServices });
+installAiAssistantRoutes(app);
 
 app.get("/health", (req, res) => res.json({ status: "ok" }));
 app.listen(PORT, "0.0.0.0", () => console.log(`Server is running on port ${PORT}`));
