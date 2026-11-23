@@ -1,6 +1,7 @@
 const express = require("express");
 const { installBookingRoutes } = require("./booking-system");
 const { installAiAssistantRoutes } = require("./ai-assistant");
+const { enhanceHomepage } = require("./site-enhancements");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -153,7 +154,7 @@ function bookingPage(req) {
   const body = `<div class="booking-main"><header style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">${logo()}<nav><a href="/book?lang=my">မြန်မာ</a> | <a href="/book?lang=en">English</a></nav></header><p style="color:#176b55;font-weight:700;margin-top:24px">SoeK Hub Zone • Coaching & Consultation</p><h1>${t.title}</h1><p style="color:#526c5f">${lang==="my"?"အောက်ပါအချက်အလက်များ ဖြည့်သွင်းပြီး ချိန်းဆိုမှုတောင်းဆိုနိုင်ပါသည်။":"Complete the form below and we will contact you to confirm your appointment."}</p><form method="post" action="/booking" accept-charset="UTF-8"><input type="hidden" name="lang" value="${lang}"><label for="name">${t.name} *</label><input id="name" name="name" autocomplete="name" required maxlength="100"><label for="email">${t.email} *</label><input id="email" type="email" name="email" autocomplete="email" required maxlength="200"><label for="phone">${t.phone} *</label><input id="phone" type="tel" name="phone" autocomplete="tel" required maxlength="40"><label for="service">${t.service} *</label><select id="service" name="service" required><option value="">${t.choose}</option><option value="Small Business Coaching">${t.business}</option><option value="Personal Development Counseling">${t.counseling}</option></select><label for="date">${t.date} *</label><input id="date" type="date" name="date" required min="${new Date().toISOString().slice(0,10)}"><label for="message">${t.notes}</label><textarea id="message" name="message" rows="4" maxlength="1000"></textarea><small>${t.privacy}</small><button type="submit">${t.submit}</button></form><p style="margin-top:20px"><a href="/">← ${t.home}</a></p></div>`;
   return shell(body, "SoeK Hub Zone | Book a Consultation");
 }
-app.get("/", (req, res) => res.type("html").send(homepage()));
+app.get("/", (req, res) => res.type("html").send(enhanceHomepage(homepage())));
 app.get("/book", (req, res) => res.type("html").send(bookingPage(req)));
 
 function page(lang, body) {
