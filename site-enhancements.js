@@ -65,7 +65,6 @@ function enhanceHomepage(html) {
   html = html.replace('<section class="section" id="services">', about + '<section class="section" id="services">');
   html = html.replace('<section class="section soft" id="products">', smeCategories + '<section class="section soft" id="products">');
   html = html.replace(/<section class="section" id="training">[\s\S]*?<\/section>/, training);
-  html = html.replace('Chat with AI SME Coach ↗</a></div></div></div></section>', 'Chat with AI SME Coach ↗</a></div></div><div class="product-feature calculator-feature"><div class="product-visual"><div class="robot">🧮</div></div><div><span class="eyebrow">New business tool • Now live</span><h2>SoeK SME Smart Calculator</h2><p>A practical calculator suite that helps small-business owners make clearer day-to-day financial decisions—without relying on guesswork.</p><ul class="feature-list"><li>Cost & pricing calculator</li><li>Sales & profit calculator</li><li>Break-even calculator</li><li>PDF & CSV export by plan</li></ul><p><strong>Test Pass 9,900 MMK</strong> · <strong>Test + PDF 14,990 MMK</strong><br><strong>Monthly 99,000 MMK</strong> · <strong>Annual 599,000 MMK</strong></p><a class="btn light" href="https://soe-k-sme-smart-calculator-3bab3a90.base44.app" target="_blank" rel="noopener noreferrer">Open SoeK SME Smart Calculator ↗</a></div></div></div></section>');
   return html;
 }
 module.exports = { enhanceHomepage };
