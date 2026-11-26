@@ -62,8 +62,6 @@ function enhanceHomepage(html) {
   </div></div><p class="course-note">ဈေးနှုန်းများသည် အကြံပြုထားသော စတင်ရောင်းချဈေးနှုန်းများဖြစ်ပြီး၊ Coming Soon / Planned ဟု ဖော်ပြထားသော ပစ္စည်းများကို အမှန်တကယ်အသုံးပြုနိုင်ကြောင်း အတည်ပြုပြီးမှ ရောင်းချပါမည်။ Website နှင့် Custom Development ဝန်ဆောင်မှုများကို လိုအပ်ချက်အလိုက် Create · Deploy · Maintain အဆင့်များဖြင့် သီးခြားတွက်ချက်ပေးပါမည်။</p><div style="text-align:center;margin-top:24px"><a class="btn" href="https://wa.me/959776705355?text=I%20would%20like%20to%20discuss%20SoeK%20Digital%20Lab%20products%20or%20custom%20solutions" target="_blank" rel="noopener noreferrer">Discuss a product or custom solution ↗</a></div></div></section>`;
   html = html.replace('<section class="section" id="services">', about + '<section class="section" id="services">');
   html = html.replace('<section class="section soft" id="products">', smeCategories + '<section class="section soft" id="products">');
-  html = html.replace('<section class="section" id="services">', about + '<section class="section" id="services">');
-  html = html.replace('<section class="section soft" id="products">', smeCategories + '<section class="section soft" id="products">');
   html = html.replace(/<section class="section" id="training">[\s\S]*?<\/section>/, training);
   return html;
 }
